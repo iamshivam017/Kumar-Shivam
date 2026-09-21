@@ -56,8 +56,8 @@ test('links to verified professional profiles and repositories', () => {
 });
 
 test('implements the restrained responsive design contract', () => {
-  for (const token of ['--canvas:', '--ink:', '--accent:', '--line:', '--space-']) assert.ok(css.includes(token), `missing ${token}`);
-  assert.match(css, /@media\s*\(max-width:\s*760px\)/);
+  for (const token of ['--canvas:', '--ink:', '--accent:', '--line:', '--space-', '--page-gutter:', '--grid-gap:']) assert.ok(css.includes(token), `missing ${token}`);
+  assert.match(css, /@media\s*\(max-width:\s*800px\)/);
   assert.match(css, /@media\s*\(max-width:\s*430px\)/);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
   assert.match(css, /:focus-visible/);
@@ -65,6 +65,25 @@ test('implements the restrained responsive design contract', () => {
   assert.doesNotMatch(css, /font-size:\s*(?:[0-9]|1[01])px/);
   const remSizes = [...css.matchAll(/font-size:\s*([\d.]+)rem/g)].map(match => Number(match[1]));
   assert.ok(remSizes.every(size => size >= 0.75), 'rem text must not fall below a readable 0.75rem floor');
+});
+
+test('uses one calibrated grid and typography scale across major sections', () => {
+  assert.match(css, /--layout-grid:repeat\(12,minmax\(0,1fr\)\)/);
+  assert.match(css, /\.hero\{[^}]*grid-template-columns:var\(--layout-grid\)/);
+  assert.match(css, /\.section-intro\{[^}]*grid-template-columns:var\(--layout-grid\)/);
+  assert.match(css, /\.case-study\{[^}]*grid-template-columns:var\(--layout-grid\)/);
+  assert.match(css, /\.about-section\{[^}]*grid-template-columns:var\(--layout-grid\)/);
+  assert.match(css, /\.contact-inner\{[^}]*grid-template-columns:var\(--layout-grid\)/);
+  assert.match(css, /h2\{font-size:clamp\(2\.5rem,[^,]+,2\.875rem\)/);
+  assert.match(css, /\.hero h1\{font-size:clamp\(4rem,[^,]+,4\.5rem\)/);
+  assert.match(css, /\.case-copy h3\{font-size:clamp\(2rem,[^,]+,2\.25rem\)/);
+  assert.match(css, /\.case-copy,\.system-frame\{min-width:0\}/);
+});
+
+test('presents additional work as a compact responsive project index', () => {
+  assert.match(html, /class="work-index-head"/);
+  assert.equal((html.match(/class="work-row"/g) || []).length, 2);
+  assert.match(css, /\.work-row\{display:grid;grid-template-columns:minmax\(0,2fr\) minmax\(0,4fr\) minmax\(0,3fr\) minmax\(8rem,1\.5fr\)/);
 });
 
 test('keeps core text colors at WCAG AA contrast', () => {
